@@ -1,4 +1,4 @@
-
+// ignore_for_file: prefer_typing_uninitialized_variables, deprecated_member_use
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -11,14 +11,12 @@ import '../constants.dart';
 
 String? moduloselect;
 class MyBottomNavBar extends StatelessWidget {
-   const MyBottomNavBar({
+  const MyBottomNavBar({
     Key? key,
   }) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
-
     return Container(
       padding: const EdgeInsets.only(
         left: kDefaultPadding * 2,
@@ -124,17 +122,16 @@ class _CustomDialogsBuscarState extends State<CustomDialogsBuscar> {
   List? dataestado;
   String? dropdownValue;
   var dataacopio;
+  String datoviaje = "";
   int total = 0;
   String? actividad;
   var ddData = [];
   String? idtransp;
-  String dato ="";
 
   _guardarModulo(String modulo) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("modulo", modulo);
   }
-
 
   Future<void> recibirDatos(
     String modulo,
@@ -195,7 +192,7 @@ class _CustomDialogsBuscarState extends State<CustomDialogsBuscar> {
         Navigator.pop(context);
       }
     });
-    Navigator.pop(context);
+    //Navigator.pop(context);
   }
 
   Future<void> atualizarAcopios(String pacopios, int tipo) async {
@@ -226,7 +223,7 @@ class _CustomDialogsBuscarState extends State<CustomDialogsBuscar> {
                     child: Column(children: const <Widget>[
                       CircularProgressIndicator(),
                       SizedBox(height: 5),
-                      Text("Creando Viaje")
+                      Text("Buscando acopios")
                     ]),
                   )));
         });
@@ -306,15 +303,18 @@ class _CustomDialogsBuscarState extends State<CustomDialogsBuscar> {
       }
 
     }
-    Navigator.pop(context);
+
+
         if(resultdetail.toString().contains("true")){
-          dato = resultate;
+          datoviaje = resultate;
         }else{
-          dato =  "-";
+          datoviaje =  "-";
         }
 
-
   }
+      if(mounted){
+        Navigator.pop(context);
+      }
 
   }
 
@@ -500,30 +500,23 @@ class _CustomDialogsBuscarState extends State<CustomDialogsBuscar> {
                                     "assets/images/warning.png"));
                                    // Navigator.pop(context);
                                 }else{
-
-
-                                      if(mounted){
-                                        await crearViaje();
-                                        setState((){
-                                          dispose();
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  GMap(
-                                                      data: data!,
-                                                      dataacopio: dataacopio,
-                                                      latinicial: latitudes!,
-                                                      longinicial: longitudes!,
-                                                      aliasinicial: aliasinicial!,
-                                                      moduloselect: moduloselect!,
-                                                      idviajeactual: dato!),
-                                            ),
-                                          );
-                                        });
-                                      }
-
-
+                                  await crearViaje();
+                                  if(mounted) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            GMap(
+                                                data: data!,
+                                                dataacopio: dataacopio,
+                                                latinicial: latitudes!,
+                                                longinicial: longitudes!,
+                                                aliasinicial: aliasinicial!,
+                                                moduloselect: moduloselect!,
+                                                idviajeactual: datoviaje!),
+                                      ),
+                                    );
+                                  }
                                 }
                              //   });
                               } else {

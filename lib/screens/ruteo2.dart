@@ -28,6 +28,7 @@ import 'package:transporte_arandanov2/screens/ruteo_sinterminar.dart';
 import 'dart:math' as math;
 
 import 'package:transporte_arandanov2/screens/second_page.dart';
+import 'package:transporte_arandanov2/screens/viaje_detalle.dart';
 
 const double pinVisiblePosition = 20;
 const double pinInvisiblePosition = -220;
@@ -2046,10 +2047,23 @@ class _GMapState extends State<GMap> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.upload_outlined),
+                                  icon: const Icon(Icons.history),
                                   onPressed: () async {
                                     setState(() {
-                                      subirJabasManual();
+                                     // subirJabasManual();
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MyViajeDetail(
+                                              numeroViaje: "001",
+                                              cantjabas: jabasporlimpiars!,
+                                              distance: double.parse(distancia!),
+                                              finicio: "20220726",
+                                              ffin: "20220726",
+                                              idviajes: int.parse(widget.idviajeactual.toString()),
+                                              ruta: "-"),
+                                        ),
+                                      );
                                       });
                                   },
                                 ),

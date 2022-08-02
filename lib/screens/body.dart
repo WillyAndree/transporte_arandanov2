@@ -2,7 +2,9 @@
 
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:dio/dio.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:transporte_arandanov2/database/database.dart';
 import 'package:transporte_arandanov2/screens/principal_page.dart';
@@ -96,6 +98,32 @@ class _BodyState extends State<Body> {
     } on Exception catch (e) {
       print('Error causador por: $e');
     }
+  }
+
+  Future openFile({required String url, String? fileName})async{
+    //final name = fileName ?? url.split('/').last;
+    final file = await downloadFile(url, fileName!);
+    if( file == null) return;
+    print('Path: ${file.path}');
+    OpenFile.open(file.path);
+  }
+
+  Future<File?> downloadFile(String url, String name)async{
+    try{
+
+    final appStorage = await getApplicationDocumentsDirectory();
+    final file = File('${appStorage.path}/$name');
+
+    final response = await Dio().get(url, options: Options(responseType: ResponseType.bytes, followRedirects: false, receiveTimeout: 0));
+
+    final raf = file.openSync(mode: FileMode.write);
+    await raf.close();
+    return file;
+
+    }catch (e){
+      return null;
+    }
+
   }
 
   @override
@@ -196,9 +224,27 @@ class _BodyState extends State<Body> {
                               alignment: Alignment.center,
                               child: IconButton(
                                   onPressed: () async {
-                                    String texto = await DatabaseProvider.db
-                                        .generateBackup();
-                                    enviarBackup(texto);
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          Size size = MediaQuery.of(context).size;
+                                          return Center(
+                                              child: AlertDialog(
+                                                  backgroundColor: Colors.transparent,
+                                                  content: Container(
+                                                    color: Colors.white,
+                                                    height: size.height / 7,
+                                                    padding: const EdgeInsets.all(20),
+                                                    child: Column(children: const <Widget>[
+                                                      CircularProgressIndicator(),
+                                                      SizedBox(height: 5),
+                                                      Text("Descargando archivo")
+                                                    ]),
+                                                  )));
+                                        });
+                                    await openFile(url:'https://web.acpagro.com/apk/tarandano/transporte.apk',fileName: 'transporte.apk');
+                                    Navigator.pop(context);
+
                                   },
                                   icon: const Icon(
                                     Icons.cloud_download,

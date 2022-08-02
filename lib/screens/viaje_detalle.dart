@@ -4,8 +4,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:transporte_arandanov2/constants.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:transporte_arandanov2/screens/edicion_viaje.dart';
 import 'package:transporte_arandanov2/screens/second_page.dart';
 
 const double pinVisiblePosition = 20;
@@ -52,6 +54,7 @@ class _MyViajeDetailState extends State<MyViajeDetail> {
   BitmapDescriptor? destinationIcon;
   BitmapDescriptor? mediaIcon;
   bool userBadgeSelected = false;
+  String? placa;
   bool resetToggle = false;
 
   List? data;
@@ -64,6 +67,7 @@ class _MyViajeDetailState extends State<MyViajeDetail> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       idtransp = prefs.get("id") ?? 0;
+      placa = (prefs.get("placa") ?? "-") as String?;
       print('IDS: ' + idtransp);
     });
     var response = await http.get(
@@ -113,6 +117,44 @@ class _MyViajeDetailState extends State<MyViajeDetail> {
       }
     });
   }
+
+  Future<void> EliminarRegistro(String idviajee, String cantjabase, String fechafine) async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          Size size = MediaQuery.of(context).size;
+          return Center(
+              child: AlertDialog(
+                  backgroundColor: Colors.transparent,
+                  content: Container(
+                    color: Colors.white,
+                    height: size.height / 7,
+                    padding: const EdgeInsets.all(20),
+                    child: Column(children: const <Widget>[
+                      CircularProgressIndicator(),
+                      SizedBox(height: 5),
+                      Text("Eliminando trazabilidad")
+                    ]),
+                  )));
+        });
+    //var hra = new DateFormat('hh:mm:ss');
+    //var hras = hra.format(fechafine as DateTime);
+   // print("-"+idviajee+"-"+cantjabase+"-"+hras);
+    String hras = fechafine.replaceAll("-", "");
+    var response = await http.post(
+        Uri.parse(
+            "${url_base}acp/index.php/transportearandano/setDeleteJabasApp"),
+        body: {"idviajes": idviajee, "jabascargadas": cantjabase, "hora": hras});
+    if (mounted) {
+      setState(() {
+        var extraerData = json.decode(response.body);
+        String result = extraerData["state"].toString();
+        print("RESULTADO DE INSERCIÓN DE acopios: $result");
+      });
+    }
+    Navigator.pop(context);
+  }
+
 
   Future<void> recibirArcos() async {
     if (widget.ruta == '-') {
@@ -251,12 +293,13 @@ class _MyViajeDetailState extends State<MyViajeDetail> {
                                         size: 32,
                                       )))),
                           onTap: () {
-                            Navigator.push(
+                            Navigator.pop(context);
+                           /* Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => const SecondPage(),
                               ),
-                            );
+                            );*/
                           },
                         )),
                     Align(
@@ -288,7 +331,9 @@ class _MyViajeDetailState extends State<MyViajeDetail> {
                     FloatingActionButtonLocation.startFloat,
                 floatingActionButton: FloatingActionButton(
                   backgroundColor: kArandano,
-                  onPressed: null,
+                  onPressed: (){
+                    recibirDatos();
+                  },
                   child: Image.asset('assets/images/arandano_blanco.png',
                       width: 28, height: 28, fit: BoxFit.cover),
                 ),
@@ -369,6 +414,34 @@ class _MyViajeDetailState extends State<MyViajeDetail> {
                                     ],
                                   ),
                                 ),
+                                placa!.contains('ADM') ?
+                                Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          color: kPrimaryColor, size: 30), onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EdicionViaje(
+                                                  idviajes: widget.idviajes.toString(), jabascargadas: data![i]["JABASCARGADAS"],fecha: data![i]["FLLEGADA"]
+                                                ),
+                                          ),
+                                        );
+                                      }),
+                                      const SizedBox(height: 20,),
+                                      IconButton(onPressed:() async{
+                                        await EliminarRegistro(widget.idviajes.toString(), data![i]["JABASCARGADAS"], data![i]["FLLEGADA"]);
+                                        await recibirDatos();
+                                      }, icon: const Icon(Icons.cleaning_services,
+                                          color: Colors.red, size: 30))
+
+                                    ]
+                                ): Container()
+
                               ],
                             ),
                           );

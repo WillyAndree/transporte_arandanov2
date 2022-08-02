@@ -16,6 +16,7 @@ import 'package:transporte_arandanov2/model/jabas_model.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:transporte_arandanov2/screens/second_page.dart';
+import 'package:transporte_arandanov2/screens/viaje_detalle.dart';
 import '../constants.dart';
 import 'Dart:io';
 import 'package:flutter_isolate/flutter_isolate.dart';
@@ -240,9 +241,12 @@ class _GMapState extends State<GMap> {
       capacidad = (prefs.get("capacidad_vehiculo") ?? "0") as int?;
       name = (prefs.get("name") ?? "Usuario") as String;
       placa = (prefs.get("placa") ?? "-") as String?;
-      modulo = (prefs.get("modulo") ?? "-") as String;
 
     });
+  }
+  _cargarModulo() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    modulo = (prefs.get("modulo") ?? "-") as String;
   }
 
   FlutterIsolate? isolate;
@@ -261,7 +265,7 @@ class _GMapState extends State<GMap> {
       currentLocationes = cLoc;
       updatePinOnMap();
     });
-
+    _cargarModulo();
     setInitialLocation();
     recibirDatos();
     subirJabas();
@@ -1969,10 +1973,23 @@ throw ("Formato erroneo ");
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.upload_outlined),
+                                  icon: const Icon(Icons.history),
                                   onPressed: () async {
                                     setState(() {
-                                      subirJabasManual();
+                                      //subirJabasManual();
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MyViajeDetail(
+                                              numeroViaje: "001",
+                                              cantjabas: jabasporlimpiars!,
+                                              distance: double.parse(distancia!),
+                                              finicio: "20220726",
+                                              ffin: "20220726",
+                                              idviajes: int.parse(widget.idviajes.toString()),
+                                              ruta: "-"),
+                                        ),
+                                      );
                                     });
                                   },
                                 ),

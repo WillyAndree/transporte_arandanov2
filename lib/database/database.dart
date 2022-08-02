@@ -267,6 +267,27 @@ class DatabaseProvider {
     }
   }
 
+  Future<List<Variedades>> getVariedadWithTotal() async {
+    var db = await database;
+    List<Variedades> variedadesList = [];
+    List<Map> queryList = await db.query("variedades");
+    print('[DBVariedades] getVariedades: ${queryList.length} descripcion');
+    if (queryList.isNotEmpty) {
+      for (int i = 0; i < queryList.length; i++) {
+        variedadesList.add(Variedades(
+          idconsumidor: queryList[i]['idconsumidor'],
+          descripcion: queryList[i]['descripcion'],
+        ));
+      }
+      print('[DBVariedades] getVariedades: ${variedadesList[0].descripcion}');
+      return variedadesList;
+    } else {
+      print('[DBVariedades] getVariedades: Variedades is null');
+      return [];
+    }
+  }
+
+
   Future<String> generateBackup({bool isEncrypted = false}) async {
     print('GENERATE BACKUP');
 
